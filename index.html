@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cypis Sacco Management System</title>
+    <title>Cypis Sacco - Uganda Sacco System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,7 +16,7 @@
                     <i class="fas fa-piggy-bank text-5xl text-yellow-400"></i>
                 </div>
                 <h1 class="text-4xl font-bold text-white mb-2">Cypis Sacco</h1>
-                <p class="text-white/80">Sacco Management System</p>
+                <p class="text-white/80">Uganda Sacco Management System</p>
             </div>
             
             <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
@@ -43,57 +43,74 @@
                                placeholder="Enter your password">
                     </div>
                     
-                    <button type="submit" 
+                    <button type="submit" id="loginBtn" 
                             class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded-lg transition duration-300">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Login to Dashboard
+                        <i class="fas fa-spinner fa-spin hidden mr-2" id="loadingSpinner"></i>
+                        <span id="loginText">Login to Dashboard</span>
                     </button>
                 </form>
             </div>
             
             <div class="text-center mt-8 text-white/60 text-sm">
                 <p>Test Credentials:</p>
-                <p class="text-xs">manager@cypissacco.com / admin123 | assistant@cypissacco.com / assistant123 | officer@cypissacco.com / officer123</p>
+                <p class="text-xs">manager@cypissacco.com / admin123</p>
+                <p class="text-xs">assistant@cypissacco.com / assistant123</p>
+                <p class="text-xs">officer@cypissacco.com / officer123</p>
             </div>
         </div>
     </div>
 
     <script>
-        // YOUR ACTUAL SUPABASE CREDENTIALS
         const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA'; // ← PASTE YOUR ANON KEY HERE
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('loginText').textContent = 'Logging in...';
+            document.getElementById('loginBtn').disabled = true;
+            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-            
-            if (error) {
-                document.getElementById('errorMessage').textContent = error.message;
-                document.getElementById('errorMessage').classList.remove('hidden');
-            } else {
-                localStorage.setItem('user', JSON.stringify(data.user));
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
                 
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', data.user.id)
-                    .single();
-                
-                if (profile.role === 'branch_manager') {
-                    window.location.href = 'manager/dashboard.html';
-                } else if (profile.role === 'account_assistant') {
-                    window.location.href = 'assistant/transactions.html';
-                } else if (profile.role === 'loan_officer') {
-                    window.location.href = 'loan_officer/loans.html';
+                if (error) {
+                    document.getElementById('errorMessage').innerHTML = error.message;
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                } else if (data && data.user) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', data.user.id)
+                        .single();
+                    
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    if (profile?.role === 'branch_manager') {
+                        window.location.href = 'manager/dashboard.html';
+                    } else if (profile?.role === 'account_assistant') {
+                        window.location.href = 'assistant/transactions.html';
+                    } else if (profile?.role === 'loan_officer') {
+                        window.location.href = 'loan_officer/loans.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
                 }
+            } catch (err) {
+                document.getElementById('errorMessage').innerHTML = 'Connection error: ' + err.message;
+                document.getElementById('errorMessage').classList.remove('hidden');
+            } finally {
+                document.getElementById('loadingSpinner').classList.add('hidden');
+                document.getElementById('loginText').textContent = 'Login to Dashboard';
+                document.getElementById('loginBtn').disabled = false;
             }
         });
     </script>
