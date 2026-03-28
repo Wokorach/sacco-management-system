@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - Cypis Sacco</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-piggy-bank text-2xl text-green-600 mr-2"></i>
+                    <span class="font-bold text-xl">Cypis Sacco - Manager Dashboard</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userName" class="text-gray-700"></span>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Members</p>
+                        <p id="totalMembers" class="text-3xl font-bold">0</p>
+                    </div>
+                    <i class="fas fa-users text-3xl text-blue-500 opacity-50"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Deposits</p>
+                        <p id="totalDeposits" class="text-3xl font-bold">UGX 0</p>
+                    </div>
+                    <i class="fas fa-arrow-down text-3xl text-green-500 opacity-50"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Withdrawals</p>
+                        <p id="totalWithdrawals" class="text-3xl font-bold">UGX 0</p>
+                    </div>
+                    <i class="fas fa-arrow-up text-3xl text-red-500 opacity-50"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Active Loans</p>
+                        <p id="activeLoans" class="text-3xl font-bold">0</p>
+                    </div>
+                    <i class="fas fa-hand-holding-usd text-3xl text-yellow-500 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Members List -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b">
+                <h3 class="text-lg font-semibold">Recent Members</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Member #</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Full Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Phone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTable" class="divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_0GcM5qTByWWCQ3siPUkdsg_-_ipxLrG'; // ← PASTE YOUR ANON KEY HERE
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) window.location.href = '../index.html';
+        
+        document.getElementById('userName').textContent = user.email;
+        
+        async function loadStats() {
+            const { count: membersCount } = await supabase
+                .from('members')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalMembers').textContent = membersCount || 0;
+            
+            const { data: deposits } = await supabase
+                .from('transactions')
+                .select('amount')
+                .eq('transaction_type', 'deposit')
+                .eq('status', 'completed');
+            const totalDeposits = deposits?.reduce((sum, t) => sum + t.amount, 0) || 0;
+            document.getElementById('totalDeposits').textContent = `UGX ${totalDeposits.toLocaleString()}`;
+            
+            const { data: withdrawals } = await supabase
+                .from('transactions')
+                .select('amount')
+                .eq('transaction_type', 'withdrawal')
+                .eq('status', 'completed');
+            const totalWithdrawals = withdrawals?.reduce((sum, t) => sum + t.amount, 0) || 0;
+            document.getElementById('totalWithdrawals').textContent = `UGX ${totalWithdrawals.toLocaleString()}`;
+            
+            const { count: loansCount } = await supabase
+                .from('loans')
+                .select('*', { count: 'exact', head: true })
+                .in('status', ['approved', 'disbursed']);
+            document.getElementById('activeLoans').textContent = loansCount || 0;
+        }
+        
+        async function loadMembers() {
+            const { data: members } = await supabase
+                .from('members')
+                .select('member_number, full_name, phone, status, registration_date')
+                .order('created_at', { ascending: false })
+                .limit(10);
+            
+            const tbody = document.getElementById('membersTable');
+            if (!members || members.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No members yet</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = members.map(m => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm">${m.member_number}</td>
+                    <td class="px-6 py-4 text-sm font-medium">${m.full_name}</td>
+                    <td class="px-6 py-4 text-sm">${m.phone}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 text-xs rounded-full ${m.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${m.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm">${new Date(m.registration_date).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.removeItem('user');
+            window.location.href = '../index.html';
+        }
+        
+        loadStats();
+        loadMembers();
+    </script>
+</body>
+</html>
