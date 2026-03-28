@@ -10,15 +10,16 @@
 </head>
 <body class="bg-gray-100">
     <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <i class="fas fa-piggy-bank text-2xl text-green-600 mr-2"></i>
-                    <span class="font-bold text-xl">Cypis Sacco - Loan Officer</span>
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-piggy-bank text-2xl text-green-600"></i>
+                    <span class="font-bold text-xl text-gray-800">Cypis Sacco</span>
+                    <span class="bg-purple-100 text-purple-700 text-sm px-3 py-1 rounded-full">Loan Officer</span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span id="userName" class="text-gray-700"></span>
-                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    <span id="userName" class="text-gray-600"></span>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
                         <i class="fas fa-sign-out-alt mr-2"></i>Logout
                     </button>
                 </div>
@@ -28,217 +29,47 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Loan Application Form -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-semibold mb-4">New Loan Application</h2>
-                <form id="loanForm">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Select Member</label>
-                        <select id="memberId" required class="w-full px-3 py-2 border rounded-lg">
-                            <option value="">Select member</option>
-                        </select>
+                <h2 class="text-xl font-bold mb-4"><i class="fas fa-file-alt text-purple-600 mr-2"></i>New Loan Application</h2>
+                <form id="loanForm" class="space-y-4">
+                    <div><label class="block text-gray-700 text-sm font-bold mb-2">Select Member</label><select id="memberId" required class="w-full px-3 py-2 border rounded-lg"><option value="">Select member</option></select></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-gray-700 text-sm font-bold mb-2">Loan Type</label><select id="loanType" class="w-full px-3 py-2 border rounded-lg"><option value="emergency">Emergency</option><option value="development">Development</option><option value="education">Education</option><option value="business">Business</option></select></div>
+                        <div><label class="block text-gray-700 text-sm font-bold mb-2">Principal (UGX)</label><input type="number" id="principal" step="0.01" required class="w-full px-3 py-2 border rounded-lg"></div>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Loan Type</label>
-                            <select id="loanType" class="w-full px-3 py-2 border rounded-lg">
-                                <option value="emergency">Emergency Loan</option>
-                                <option value="development">Development Loan</option>
-                                <option value="education">Education Loan</option>
-                                <option value="business">Business Loan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Principal (UGX)</label>
-                            <input type="number" id="principal" step="0.01" required class="w-full px-3 py-2 border rounded-lg">
-                        </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-gray-700 text-sm font-bold mb-2">Interest Rate (%)</label><input type="number" id="interestRate" step="0.1" value="12" required class="w-full px-3 py-2 border rounded-lg"></div>
+                        <div><label class="block text-gray-700 text-sm font-bold mb-2">Duration (Months)</label><input type="number" id="duration" min="1" max="60" required class="w-full px-3 py-2 border rounded-lg"></div>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Interest Rate (%)</label>
-                            <input type="number" id="interestRate" step="0.1" value="12" required class="w-full px-3 py-2 border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Duration (Months)</label>
-                            <input type="number" id="duration" min="1" max="60" required class="w-full px-3 py-2 border rounded-lg">
-                        </div>
-                    </div>
-                    
-                    <div id="calculatorResult" class="bg-blue-50 p-4 rounded-lg mb-4 hidden">
+                    <div id="calcResult" class="bg-blue-50 p-4 rounded-lg hidden">
                         <p class="text-sm"><strong>Monthly Installment:</strong> <span id="monthlyPayment" class="font-bold text-blue-600">UGX 0</span></p>
                         <p class="text-sm mt-1"><strong>Total Payable:</strong> <span id="totalPayable" class="font-bold text-blue-600">UGX 0</span></p>
                     </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Application Date</label>
-                        <input type="date" id="appDate" value="<?php echo date('Y-m-d'); ?>" required class="w-full px-3 py-2 border rounded-lg">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Notes / Documents</label>
-                        <textarea id="documents" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea>
-                    </div>
-                    
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">
+                    <div><label class="block text-gray-700 text-sm font-bold mb-2">Application Date</label><input type="date" id="appDate" value="2024-01-01" required class="w-full px-3 py-2 border rounded-lg"></div>
+                    <div><label class="block text-gray-700 text-sm font-bold mb-2">Notes / Documents</label><textarea id="documents" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea></div>
+                    <button type="submit" class="w-full bg-purple-600 text-white font-bold py-2 rounded-lg hover:bg-purple-700">
                         <i class="fas fa-paper-plane mr-2"></i>Submit Application
                     </button>
                 </form>
             </div>
             
-            <!-- Pending Loans -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-semibold mb-4">Pending Applications</h2>
-                <div id="pendingLoans" class="space-y-3 max-h-[600px] overflow-y-auto"></div>
+                <h2 class="text-xl font-bold mb-4"><i class="fas fa-clock text-yellow-600 mr-2"></i>Pending Applications</h2>
+                <div id="pendingLoans" class="space-y-3 max-h-[500px] overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA'; // ← PASTE YOUR ANON KEY HERE
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const user = JSON.parse(localStorage.getItem('user'));
+        
         if (!user) window.location.href = '../index.html';
         
         document.getElementById('userName').textContent = user.email;
         
-        // Calculate loan payments
         function calculateLoan() {
-            const principal = parseFloat(document.getElementById('principal').value);
-            const rate = parseFloat(document.getElementById('interestRate').value);
-            const months = parseInt(document.getElementById('duration').value);
-            
-            if (principal && rate && months && principal > 0 && months > 0) {
-                const monthlyRate = rate / 100 / 12;
-                const monthlyPayment = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
-                const totalPayable = monthlyPayment * months;
-                
-                document.getElementById('monthlyPayment').textContent = `UGX ${monthlyPayment.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                document.getElementById('totalPayable').textContent = `UGX ${totalPayable.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                document.getElementById('calculatorResult').classList.remove('hidden');
-            } else {
-                document.getElementById('calculatorResult').classList.add('hidden');
-            }
-        }
-        
-        document.getElementById('principal').addEventListener('input', calculateLoan);
-        document.getElementById('interestRate').addEventListener('input', calculateLoan);
-        document.getElementById('duration').addEventListener('input', calculateLoan);
-        
-        async function loadMembers() {
-            const { data: members } = await supabase
-                .from('members')
-                .select('id, full_name, member_number')
-                .eq('status', 'active');
-            
-            const select = document.getElementById('memberId');
-            if (!members || members.length === 0) {
-                select.innerHTML = '<option value="">No members available</option>';
-                return;
-            }
-            select.innerHTML = '<option value="">Select member</option>' + 
-                members.map(m => `<option value="${m.id}">${m.full_name} (${m.member_number})</option>`).join('');
-        }
-        
-        async function loadPendingLoans() {
-            const { data: loans } = await supabase
-                .from('loans')
-                .select(`
-                    id,
-                    loan_number,
-                    principal_amount,
-                    loan_type,
-                    duration_months,
-                    status,
-                    application_date,
-                    members (
-                        full_name,
-                        member_number
-                    )
-                `)
-                .eq('loan_officer_id', user.id)
-                .eq('status', 'pending')
-                .order('application_date', { ascending: false });
-            
-            const container = document.getElementById('pendingLoans');
-            if (!loans || loans.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4">No pending loan applications</p>';
-                return;
-            }
-            
-            container.innerHTML = loans.map(l => `
-                <div class="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-semibold">${l.members?.full_name || 'N/A'}</p>
-                            <p class="text-sm text-gray-600">${l.loan_number}</p>
-                            <p class="text-sm">Type: ${l.loan_type}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold">UGX ${l.principal_amount.toLocaleString()}</p>
-                            <p class="text-xs text-gray-500">${l.duration_months} months</p>
-                            <p class="text-xs">Applied: ${new Date(l.application_date).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        document.getElementById('loanForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const memberId = document.getElementById('memberId').value;
-            const loanType = document.getElementById('loanType').value;
-            const principal = parseFloat(document.getElementById('principal').value);
-            const interestRate = parseFloat(document.getElementById('interestRate').value);
-            const duration = parseInt(document.getElementById('duration').value);
-            
-            // Calculate loan terms
-            const monthlyRate = interestRate / 100 / 12;
-            const monthlyInstallment = principal * monthlyRate * Math.pow(1 + monthlyRate, duration) / (Math.pow(1 + monthlyRate, duration) - 1);
-            const totalPayable = monthlyInstallment * duration;
-            
-            const loanNumber = 'LN' + Date.now() + Math.floor(Math.random() * 1000);
-            
-            const { error } = await supabase
-                .from('loans')
-                .insert({
-                    loan_number: loanNumber,
-                    member_id: memberId,
-                    loan_type: loanType,
-                    principal_amount: principal,
-                    interest_rate: interestRate,
-                    duration_months: duration,
-                    monthly_installment: monthlyInstallment,
-                    total_payable: totalPayable,
-                    balance: totalPayable,
-                    application_date: document.getElementById('appDate').value,
-                    loan_officer_id: user.id,
-                    documents_submitted: document.getElementById('documents').value
-                });
-            
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                alert('Loan application submitted successfully!');
-                document.getElementById('loanForm').reset();
-                document.getElementById('calculatorResult').classList.add('hidden');
-                loadPendingLoans();
-            }
-        });
-        
-        async function logout() {
-            await supabase.auth.signOut();
-            localStorage.removeItem('user');
-            window.location.href = '../index.html';
-        }
-        
-        loadMembers();
-        loadPendingLoans();
-    </script>
-</body>
-</html>
+            const principal
