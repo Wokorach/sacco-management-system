@@ -8,91 +8,98 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gradient-to-br from-green-800 via-emerald-700 to-teal-800 min-h-screen">
-    <div class="container mx-auto px-4 py-16">
-        <div class="max-w-md mx-auto">
-            <div class="text-center mb-8">
-                <div class="inline-block bg-white/20 backdrop-blur-lg rounded-full p-4 mb-4">
-                    <i class="fas fa-piggy-bank text-5xl text-yellow-400"></i>
-                </div>
-                <h1 class="text-4xl font-bold text-white mb-2">Cypis Sacco</h1>
-                <p class="text-white/80">Uganda Sacco Management System</p>
+<body class="bg-gradient-to-br from-green-800 via-emerald-700 to-teal-800 min-h-screen flex items-center justify-center">
+    <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+        <div class="text-center mb-8">
+            <div class="inline-block bg-white/20 backdrop-blur-lg rounded-full p-4 mb-4">
+                <i class="fas fa-piggy-bank text-5xl text-yellow-400"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-2">Cypis Sacco</h1>
+            <p class="text-white/80">Uganda Sacco Management System</p>
+        </div>
+        
+        <div id="errorMessage" class="hidden bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded-lg mb-4"></div>
+        
+        <form id="loginForm">
+            <div class="mb-5">
+                <label class="block text-white mb-2 text-sm font-medium">
+                    <i class="fas fa-envelope mr-2"></i>Email
+                </label>
+                <input type="email" id="email" required 
+                       class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                       placeholder="Enter your email">
             </div>
             
-            <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
-                <h2 class="text-2xl font-semibold text-white mb-6 text-center">Welcome Back</h2>
-                
-                <div id="errorMessage" class="hidden bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded-lg mb-4"></div>
-                
-                <form id="loginForm">
-                    <div class="mb-5">
-                        <label class="block text-white mb-2 text-sm font-medium">
-                            <i class="fas fa-envelope mr-2"></i>Email
-                        </label>
-                        <input type="email" id="email" required 
-                               class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                               placeholder="Enter your email">
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-white mb-2 text-sm font-medium">
-                            <i class="fas fa-lock mr-2"></i>Password
-                        </label>
-                        <input type="password" id="password" required 
-                               class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                               placeholder="Enter your password">
-                    </div>
-                    
-                    <button type="submit" id="loginBtn" 
-                            class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded-lg transition duration-300">
-                        <i class="fas fa-spinner fa-spin hidden mr-2" id="loadingSpinner"></i>
-                        <span id="loginText">Login to Dashboard</span>
-                    </button>
-                </form>
+            <div class="mb-6">
+                <label class="block text-white mb-2 text-sm font-medium">
+                    <i class="fas fa-lock mr-2"></i>Password
+                </label>
+                <input type="password" id="password" required 
+                       class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                       placeholder="Enter your password">
             </div>
             
-            <div class="text-center mt-8 text-white/60 text-sm">
-                <p>Test Credentials:</p>
-                <p class="text-xs">manager@cypissacco.com / admin123</p>
-                <p class="text-xs">assistant@cypissacco.com / assistant123</p>
-                <p class="text-xs">officer@cypissacco.com / officer123</p>
-            </div>
+            <button type="submit" id="loginBtn" 
+                    class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded-lg transition duration-300">
+                Login to Dashboard
+            </button>
+        </form>
+        
+        <div class="text-center mt-6 text-white/60 text-sm">
+            <p>Test Credentials:</p>
+            <p class="text-xs">manager@cypissacco.com / admin123</p>
+            <p class="text-xs">assistant@cypissacco.com / assistant123</p>
+            <p class="text-xs">officer@cypissacco.com / officer123</p>
         </div>
     </div>
 
     <script>
+        // SUPABASE CONFIGURATION - ONLY DECLARED ONCE
         const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Create client only once
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            document.getElementById('loadingSpinner').classList.remove('hidden');
-            document.getElementById('loginText').textContent = 'Logging in...';
-            document.getElementById('loginBtn').disabled = true;
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            errorDiv.classList.add('hidden');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
             
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await _supabase.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
                 
                 if (error) {
-                    document.getElementById('errorMessage').innerHTML = error.message;
-                    document.getElementById('errorMessage').classList.remove('hidden');
-                } else if (data && data.user) {
-                    const { data: profile } = await supabase
+                    errorDiv.textContent = error.message;
+                    errorDiv.classList.remove('hidden');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login to Dashboard';
+                    return;
+                }
+                
+                if (data && data.user) {
+                    const { data: profile } = await _supabase
                         .from('profiles')
-                        .select('role')
+                        .select('role, full_name')
                         .eq('id', data.user.id)
                         .single();
                     
-                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('user', JSON.stringify({
+                        id: data.user.id,
+                        email: data.user.email,
+                        role: profile?.role,
+                        full_name: profile?.full_name
+                    }));
                     
                     if (profile?.role === 'branch_manager') {
                         window.location.href = 'manager/dashboard.html';
@@ -105,14 +112,25 @@
                     }
                 }
             } catch (err) {
-                document.getElementById('errorMessage').innerHTML = 'Connection error: ' + err.message;
-                document.getElementById('errorMessage').classList.remove('hidden');
-            } finally {
-                document.getElementById('loadingSpinner').classList.add('hidden');
-                document.getElementById('loginText').textContent = 'Login to Dashboard';
-                document.getElementById('loginBtn').disabled = false;
+                errorDiv.textContent = 'Connection error: ' + err.message;
+                errorDiv.classList.remove('hidden');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login to Dashboard';
             }
         });
+        
+        // Check if already logged in
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            if (user.role === 'branch_manager') {
+                window.location.href = 'manager/dashboard.html';
+            } else if (user.role === 'account_assistant') {
+                window.location.href = 'assistant/transactions.html';
+            } else if (user.role === 'loan_officer') {
+                window.location.href = 'loan_officer/loans.html';
+            }
+        }
     </script>
 </body>
 </html>
