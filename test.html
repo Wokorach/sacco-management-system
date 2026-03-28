@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold mb-4">Supabase Connection Test</h1>
+        
+        <div id="status" class="p-4 rounded-lg mb-4 bg-gray-200">
+            Testing connection...
+        </div>
+        
+        <div id="results" class="space-y-2"></div>
+        
+        <div class="mt-4 p-4 bg-yellow-50 rounded-lg">
+            <h3 class="font-bold">Test Login:</h3>
+            <form id="testLogin" class="mt-2 space-y-2">
+                <input type="email" id="testEmail" placeholder="Email" class="w-full p-2 border rounded">
+                <input type="password" id="testPassword" placeholder="Password" class="w-full p-2 border rounded">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Test Login</button>
+            </form>
+            <div id="testResult" class="mt-2"></div>
+        </div>
+    </div>
+
+    <script>
+        // REPLACE WITH YOUR ACTUAL KEYS
+        const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA'; // ← REPLACE THIS!
+        
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        
+        // Check if keys are configured
+        if (SUPABASE_ANON_KEY === 'YOUR_ANON_PUBLIC_KEY_HERE') {
+            statusDiv.innerHTML = '❌ Supabase key not configured! Please add your anon key to the script.';
+            statusDiv.className = 'p-4 rounded-lg mb-4 bg-red-200 text-red-800';
+        } else {
+            statusDiv.innerHTML = '✅ Supabase key configured. Testing connection...';
+            statusDiv.className = 'p-4 rounded-lg mb-4 bg-green-200 text-green-800';
+            
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            // Test 1: Check if we can connect
+            supabase.auth.getSession().then(({ data, error }) => {
+                if (error) {
+                    addResult('❌ Auth connection error: ' + error.message, 'error');
+                } else {
+                    addResult('✅ Auth connection successful', 'success');
+                }
+            });
+            
+            // Test 2: Check if profiles table exists
+            supabase.from('profiles').select('count', { count: 'exact', head: true })
+                .then(({ count, error }) => {
+                    if (error) {
+                        addResult('❌ Profiles table error: ' + error.message, 'error');
+                    } else {
+                        addResult('✅ Profiles table exists. Total profiles: ' + count, 'success');
+                    }
+                });
+            
+            // Test 3: List all tables
+            supabase.from('members').select('count', { count: 'exact', head: true })
+                .then(({ count, error }) => {
+                    if (error) {
+                        addResult('❌ Members table error: ' + error.message, 'error');
+                    } else {
+                        addResult('✅ Members table exists. Total members: ' + count, 'success');
+                    }
+                });
+        }
+        
+        function addResult(message, type) {
+            const div = document.createElement('div');
+            div.className = 'p-2 rounded ' + (type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800');
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        // Test login
+        document.getElementById('testLogin').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            const resultDiv = document.getElementById('testResult');
+            
+            resultDiv.innerHTML = 'Testing login...';
+            
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+            
+            if (error) {
+                resultDiv.innerHTML = `<div class="bg-red-100 text-red-800 p-2 rounded">❌ Login failed: ${error.message}</div>`;
+            } else {
+                resultDiv.innerHTML = `<div class="bg-green-100 text-green-800 p-2 rounded">✅ Login successful! User: ${data.user.email}</div>`;
+                
+                // Get profile
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+                    
+                if (profile) {
+                    resultDiv.innerHTML += `<div class="bg-blue-100 text-blue-800 p-2 rounded mt-2">Role: ${profile.role}</div>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
