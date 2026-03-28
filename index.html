@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cypis Sacco Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-green-800 via-emerald-700 to-teal-800 min-h-screen">
+    <div class="container mx-auto px-4 py-16">
+        <div class="max-w-md mx-auto">
+            <div class="text-center mb-8">
+                <div class="inline-block bg-white/20 backdrop-blur-lg rounded-full p-4 mb-4">
+                    <i class="fas fa-piggy-bank text-5xl text-yellow-400"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-white mb-2">Cypis Sacco</h1>
+                <p class="text-white/80">Sacco Management System</p>
+            </div>
+            
+            <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
+                <h2 class="text-2xl font-semibold text-white mb-6 text-center">Welcome Back</h2>
+                
+                <div id="errorMessage" class="hidden bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded-lg mb-4"></div>
+                
+                <form id="loginForm">
+                    <div class="mb-5">
+                        <label class="block text-white mb-2 text-sm font-medium">
+                            <i class="fas fa-envelope mr-2"></i>Email
+                        </label>
+                        <input type="email" id="email" required 
+                               class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                               placeholder="Enter your email">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-white mb-2 text-sm font-medium">
+                            <i class="fas fa-lock mr-2"></i>Password
+                        </label>
+                        <input type="password" id="password" required 
+                               class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                               placeholder="Enter your password">
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded-lg transition duration-300">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login to Dashboard
+                    </button>
+                </form>
+            </div>
+            
+            <div class="text-center mt-8 text-white/60 text-sm">
+                <p>Test Credentials:</p>
+                <p class="text-xs">manager@cypissacco.com / admin123 | assistant@cypissacco.com / assistant123 | officer@cypissacco.com / officer123</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // YOUR ACTUAL SUPABASE CREDENTIALS
+        const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_0GcM5qTByWWCQ3siPUkdsg_-_ipxLrG'; // ← PASTE YOUR ANON KEY HERE
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+            
+            if (error) {
+                document.getElementById('errorMessage').textContent = error.message;
+                document.getElementById('errorMessage').classList.remove('hidden');
+            } else {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+                
+                if (profile.role === 'branch_manager') {
+                    window.location.href = 'manager/dashboard.html';
+                } else if (profile.role === 'account_assistant') {
+                    window.location.href = 'assistant/transactions.html';
+                } else if (profile.role === 'loan_officer') {
+                    window.location.href = 'loan_officer/loans.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
