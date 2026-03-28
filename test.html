@@ -3,166 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cypis Sacco - System Test</title>
+    <title>Cypis Sacco - Login Test</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h1 class="text-2xl font-bold text-green-600 mb-4">Cypis Sacco - System Test</h1>
-            
-            <div id="connectionStatus" class="p-4 rounded-lg mb-4 bg-gray-200">
-                Testing connection...
+<body class="bg-gradient-to-br from-green-800 via-emerald-700 to-teal-800 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+        <div class="text-center mb-8">
+            <div class="inline-block bg-green-100 rounded-full p-4 mb-4">
+                <i class="fas fa-piggy-bank text-4xl text-green-600"></i>
             </div>
-            
-            <div id="results" class="space-y-2 mb-6"></div>
-            
-            <div class="border-t pt-6">
-                <h2 class="text-xl font-bold mb-4">Test Login</h2>
-                <form id="loginForm" class="space-y-4">
-                    <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                        <input type="email" id="email" class="w-full p-2 border rounded-lg" placeholder="Enter email">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                        <input type="password" id="password" class="w-full p-2 border rounded-lg" placeholder="Enter password">
-                    </div>
-                    <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
-                        Test Login
-                    </button>
-                </form>
-                <div id="loginResult" class="mt-4"></div>
+            <h1 class="text-2xl font-bold text-gray-800">Cypis Sacco</h1>
+            <p class="text-gray-500">Uganda Sacco Management System</p>
+        </div>
+        
+        <div id="message" class="mb-4"></div>
+        
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+                <input type="email" id="email" required 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                       placeholder="Enter your email">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                <input type="password" id="password" required 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                       placeholder="Enter your password">
+            </div>
+            <button type="submit" id="loginBtn" 
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition duration-200">
+                Login to Dashboard
+            </button>
+        </form>
+        
+        <div class="mt-6 pt-4 border-t">
+            <p class="text-xs text-gray-500 text-center mb-2">Test Credentials:</p>
+            <div class="grid grid-cols-1 gap-2 text-xs">
+                <div class="bg-gray-50 p-2 rounded text-center">
+                    <span class="font-bold text-green-600">Manager:</span> manager@cypissacco.com / admin123
+                </div>
+                <div class="bg-gray-50 p-2 rounded text-center">
+                    <span class="font-bold text-blue-600">Assistant:</span> assistant@cypissacco.com / assistant123
+                </div>
+                <div class="bg-gray-50 p-2 rounded text-center">
+                    <span class="font-bold text-purple-600">Loan Officer:</span> officer@cypissacco.com / officer123
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
         const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const statusDiv = document.getElementById('connectionStatus');
-        const resultsDiv = document.getElementById('results');
         
-        async function testConnection() {
-            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Testing connection...';
-            
-            // Test 1: Auth
-            const { data: session } = await supabase.auth.getSession();
-            addResult('✅ Auth service is reachable', 'success');
-            
-            // Test 2: Profiles table
-            const { data: profiles, error: profilesError } = await supabase
-                .from('profiles')
-                .select('*');
-            
-            if (profilesError) {
-                addResult('❌ Profiles table error: ' + profilesError.message, 'error');
-            } else {
-                addResult(`✅ Profiles table: ${profiles.length} profiles found`, 'success');
-                profiles.forEach(p => {
-                    addResult(`   - ${p.username}: ${p.full_name} (${p.role})`, 'info');
-                });
-            }
-            
-            // Test 3: Members table
-            const { data: members, error: membersError } = await supabase
-                .from('members')
-                .select('*');
-            
-            if (membersError) {
-                addResult('❌ Members table error: ' + membersError.message, 'error');
-            } else {
-                addResult(`✅ Members table: ${members.length} members found`, 'success');
-            }
-            
-            // Test 4: Accounts table
-            const { data: accounts, error: accountsError } = await supabase
-                .from('accounts')
-                .select('*');
-            
-            if (accountsError) {
-                addResult('❌ Accounts table error: ' + accountsError.message, 'error');
-            } else {
-                addResult(`✅ Accounts table: ${accounts.length} accounts found`, 'success');
-            }
-            
-            statusDiv.innerHTML = '<i class="fas fa-check-circle mr-2"></i> All systems operational!';
-            statusDiv.className = 'p-4 rounded-lg mb-4 bg-green-200 text-green-800';
-        }
-        
-        function addResult(message, type) {
-            const div = document.createElement('div');
-            div.className = 'p-2 rounded ' + (
-                type === 'success' ? 'bg-green-100 text-green-800' :
-                type === 'error' ? 'bg-red-100 text-red-800' :
-                'bg-blue-100 text-blue-800'
-            );
-            div.innerHTML = message;
-            resultsDiv.appendChild(div);
-        }
-        
-        // Test login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const resultDiv = document.getElementById('loginResult');
+            const messageDiv = document.getElementById('message');
+            const loginBtn = document.getElementById('loginBtn');
             
-            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Logging in...';
+            messageDiv.innerHTML = '<div class="bg-blue-100 text-blue-700 p-3 rounded-lg"><i class="fas fa-spinner fa-spin mr-2"></i> Logging in...</div>';
+            loginBtn.disabled = true;
             
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-            
-            if (error) {
-                resultDiv.innerHTML = `<div class="bg-red-100 text-red-800 p-3 rounded">❌ Login failed: ${error.message}</div>`;
-            } else {
-                resultDiv.innerHTML = `<div class="bg-green-100 text-green-800 p-3 rounded">✅ Login successful! Welcome ${data.user.email}</div>`;
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
                 
-                // Get profile
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role, full_name')
-                    .eq('id', data.user.id)
-                    .single();
+                if (error) {
+                    messageDiv.innerHTML = `<div class="bg-red-100 text-red-700 p-3 rounded-lg">❌ ${error.message}</div>`;
+                    loginBtn.disabled = false;
+                    return;
+                }
                 
-                if (profile) {
-                    resultDiv.innerHTML += `<div class="bg-blue-100 text-blue-800 p-3 rounded mt-2">
-                        <strong>Role:</strong> ${profile.role}<br>
-                        <strong>Name:</strong> ${profile.full_name}
+                if (data && data.user) {
+                    // Get user profile
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('role, full_name')
+                        .eq('id', data.user.id)
+                        .single();
+                    
+                    if (profileError) {
+                        messageDiv.innerHTML = `<div class="bg-yellow-100 text-yellow-700 p-3 rounded-lg">⚠️ Logged in but profile not found</div>`;
+                        loginBtn.disabled = false;
+                        return;
+                    }
+                    
+                    // Store user data
+                    localStorage.setItem('user', JSON.stringify({
+                        id: data.user.id,
+                        email: data.user.email,
+                        role: profile.role,
+                        full_name: profile.full_name
+                    }));
+                    
+                    messageDiv.innerHTML = `<div class="bg-green-100 text-green-700 p-3 rounded-lg">
+                        ✅ Login successful!<br>
+                        Welcome ${profile.full_name}<br>
+                        Role: ${profile.role}<br>
+                        Redirecting...
                     </div>`;
                     
-                    // Store user info
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('userRole', profile.role);
-                    
-                    // Show redirect info
-                    let redirectUrl = '';
-                    if (profile.role === 'branch_manager') redirectUrl = 'manager/dashboard.html';
-                    else if (profile.role === 'account_assistant') redirectUrl = 'assistant/transactions.html';
-                    else if (profile.role === 'loan_officer') redirectUrl = 'loan_officer/loans.html';
-                    
-                    if (redirectUrl) {
-                        resultDiv.innerHTML += `<div class="bg-yellow-100 text-yellow-800 p-3 rounded mt-2">
-                            ⏳ Redirecting to ${redirectUrl}...
-                        </div>`;
-                        
-                        setTimeout(() => {
-                            window.location.href = redirectUrl;
-                        }, 2000);
-                    }
+                    // Redirect based on role
+                    setTimeout(() => {
+                        if (profile.role === 'branch_manager') {
+                            window.location.href = 'manager/dashboard.html';
+                        } else if (profile.role === 'account_assistant') {
+                            window.location.href = 'assistant/transactions.html';
+                        } else if (profile.role === 'loan_officer') {
+                            window.location.href = 'loan_officer/loans.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
+                    }, 1500);
                 }
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="bg-red-100 text-red-700 p-3 rounded-lg">❌ Connection error: ${err.message}</div>`;
+                loginBtn.disabled = false;
             }
         });
         
-        // Run tests
-        testConnection();
+        // Check if already logged in
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            window.location.href = user.role === 'branch_manager' ? 'manager/dashboard.html' :
+                                   user.role === 'account_assistant' ? 'assistant/transactions.html' :
+                                   user.role === 'loan_officer' ? 'loan_officer/loans.html' : 'dashboard.html';
+        }
     </script>
 </body>
 </html>
