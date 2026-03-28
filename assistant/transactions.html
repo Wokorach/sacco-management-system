@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Assistant - Cypis Sacco</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-piggy-bank text-2xl text-green-600 mr-2"></i>
+                    <span class="font-bold text-xl">Cypis Sacco - Account Assistant</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userName" class="text-gray-700"></span>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Create Member Form -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Create New Member</h2>
+                <form id="memberForm">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Full Name *</label>
+                            <input type="text" id="fullName" required class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">National ID *</label>
+                            <input type="text" id="nationalId" required class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                            <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Phone *</label>
+                            <input type="tel" id="phone" required class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Physical Address</label>
+                        <input type="text" id="address" class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Occupation</label>
+                            <input type="text" id="occupation" class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Monthly Income (UGX)</label>
+                            <input type="number" id="income" class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-user-plus mr-2"></i>Create Member
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Process Transaction Form -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Process Transaction</h2>
+                <form id="transactionForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Select Member</label>
+                        <select id="memberId" class="w-full px-3 py-2 border rounded-lg" required>
+                            <option value="">Select member</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Transaction Type</label>
+                        <div class="flex space-x-2">
+                            <button type="button" onclick="setType('deposit')" id="depositBtn" 
+                                    class="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg">
+                                <i class="fas fa-arrow-down mr-2"></i>Deposit
+                            </button>
+                            <button type="button" onclick="setType('withdrawal')" id="withdrawalBtn"
+                                    class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                                <i class="fas fa-arrow-up mr-2"></i>Withdrawal
+                            </button>
+                        </div>
+                        <input type="hidden" id="transactionType" value="deposit">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Amount (UGX)</label>
+                        <input type="number" id="amount" step="0.01" required class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Description</label>
+                        <textarea id="description" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-check-circle mr-2"></i>Process Transaction
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Recent Transactions -->
+        <div class="bg-white rounded-lg shadow p-6 mt-6">
+            <h2 class="text-xl font-semibold mb-4">Recent Transactions</h2>
+            <div id="recentTransactions" class="space-y-3 max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_0GcM5qTByWWCQ3siPUkdsg_-_ipxLrG'; // ← PASTE YOUR ANON KEY HERE
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) window.location.href = '../index.html';
+        
+        document.getElementById('userName').textContent = user.email;
+        
+        function setType(type) {
+            document.getElementById('transactionType').value = type;
+            const depositBtn = document.getElementById('depositBtn');
+            const withdrawalBtn = document.getElementById('withdrawalBtn');
+            
+            if (type === 'deposit') {
+                depositBtn.className = 'flex-1 bg-green-500 text-white px-4 py-2 rounded-lg';
+                withdrawalBtn.className = 'flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg';
+            } else {
+                withdrawalBtn.className = 'flex-1 bg-red-500 text-white px-4 py-2 rounded-lg';
+                depositBtn.className = 'flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg';
+            }
+        }
+        
+        async function loadMembers() {
+            const { data: members } = await supabase
+                .from('members')
+                .select('id, full_name, member_number')
+                .eq('status', 'active');
+            
+            const select = document.getElementById('memberId');
+            if (!members || members.length === 0) {
+                select.innerHTML = '<option value="">No members yet. Create one first!</option>';
+                return;
+            }
+            select.innerHTML = '<option value="">Select member</option>' + 
+                members.map(m => `<option value="${m.id}">${m.full_name} (${m.member_number})</option>`).join('');
+        }
+        
+        document.getElementById('memberForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const memberNumber = 'MEM' + Date.now();
+            
+            const { error } = await supabase
+                .from('members')
+                .insert({
+                    member_number: memberNumber,
+                    national_id: document.getElementById('nationalId').value,
+                    full_name: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    physical_address: document.getElementById('address').value,
+                    occupation: document.getElementById('occupation').value,
+                    monthly_income: document.getElementById('income').value || null,
+                    registration_date: new Date().toISOString().split('T')[0],
+                    created_by: user.id,
+                    approved_by: user.id,
+                    approved_at: new Date().toISOString()
+                });
+            
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
+                alert('Member created successfully!');
+                document.getElementById('memberForm').reset();
+                loadMembers();
+                loadRecentTransactions();
+            }
+        });
+        
+        document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const memberId = document.getElementById('memberId').value;
+            const type = document.getElementById('transactionType').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const description = document.getElementById('description').value;
+            
+            if (!memberId) {
+                alert('Please select a member');
+                return;
+            }
+            
+            let accountId;
+            const { data: existingAccount } = await supabase
+                .from('accounts')
+                .select('id')
+                .eq('member_id', memberId)
+                .eq('status', 'active')
+                .single();
+            
+            if (existingAccount) {
+                accountId = existingAccount.id;
+            } else {
+                const accountNumber = 'ACC' + Date.now();
+                const { data: newAccount } = await supabase
+                    .from('accounts')
+                    .insert({
+                        account_number: accountNumber,
+                        member_id: memberId,
+                        opened_date: new Date().toISOString().split('T')[0],
+                        created_by: user.id,
+                        approved_by: user.id
+                    })
+                    .select()
+                    .single();
+                accountId = newAccount.id;
+            }
+            
+            const transactionNumber = 'TXN' + Date.now() + Math.floor(Math.random() * 1000);
+            
+            const { error } = await supabase
+                .from('transactions')
+                .insert({
+                    transaction_number: transactionNumber,
+                    account_id: accountId,
+                    transaction_type: type,
+                    amount: amount,
+                    transaction_date: new Date().toISOString().split('T')[0],
+                    description: description,
+                    processed_by: user.id,
+                    approved_by: user.id,
+                    status: 'completed'
+                });
+            
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
+                alert('Transaction processed successfully!');
+                document.getElementById('transactionForm').reset();
+                loadRecentTransactions();
+                window.location.reload();
+            }
+        });
+        
+        async function loadRecentTransactions() {
+            const { data: transactions } = await supabase
+                .from('transactions')
+                .select(`
+                    transaction_number,
+                    amount,
+                    transaction_type,
+                    created_at,
+                    accounts (
+                        members (
+                            full_name
+                        )
+                    )
+                `)
+                .order('created_at', { ascending: false })
+                .limit(10);
+            
+            const container = document.getElementById('recentTransactions');
+            if (!transactions || transactions.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No transactions yet</p>';
+                return;
+            }
+            
+            container.innerHTML = transactions.map(t => `
+                <div class="border-l-4 ${t.transaction_type === 'deposit' ? 'border-green-500' : 'border-red-500'} bg-gray-50 p-3 rounded">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="font-semibold">${t.accounts?.members?.full_name || 'N/A'}</p>
+                            <p class="text-xs text-gray-500">${new Date(t.created_at).toLocaleString()}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold ${t.transaction_type === 'deposit' ? 'text-green-600' : 'text-red-600'}">
+                                ${t.transaction_type === 'deposit' ? '+' : '-'} UGX ${t.amount.toLocaleString()}
+                            </p>
+                            <p class="text-xs text-gray-500">${t.transaction_number}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.removeItem('user');
+            window.location.href = '../index.html';
+        }
+        
+        loadMembers();
+        loadRecentTransactions();
+    </script>
+</body>
+</html>
