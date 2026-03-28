@@ -29,52 +29,53 @@
     </div>
 
     <script>
-        // REPLACE WITH YOUR ACTUAL KEYS
+        // YOUR ACTUAL SUPABASE CREDENTIALS
         const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA'; // ← REPLACE THIS!
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA';
         
         const statusDiv = document.getElementById('status');
         const resultsDiv = document.getElementById('results');
         
-        // Check if keys are configured
-        if (SUPABASE_ANON_KEY === 'YOUR_ANON_PUBLIC_KEY_HERE') {
-            statusDiv.innerHTML = '❌ Supabase key not configured! Please add your anon key to the script.';
-            statusDiv.className = 'p-4 rounded-lg mb-4 bg-red-200 text-red-800';
-        } else {
-            statusDiv.innerHTML = '✅ Supabase key configured. Testing connection...';
-            statusDiv.className = 'p-4 rounded-lg mb-4 bg-green-200 text-green-800';
-            
-            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
-            // Test 1: Check if we can connect
-            supabase.auth.getSession().then(({ data, error }) => {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        statusDiv.innerHTML = '✅ Supabase key configured. Testing connection...';
+        statusDiv.className = 'p-4 rounded-lg mb-4 bg-green-200 text-green-800';
+        
+        // Test 1: Check auth
+        supabase.auth.getSession().then(({ data, error }) => {
+            addResult(error ? '❌ Auth error: ' + error.message : '✅ Auth connection successful', 
+                     error ? 'error' : 'success');
+        });
+        
+        // Test 2: Check profiles table
+        supabase.from('profiles').select('count', { count: 'exact', head: true })
+            .then(({ count, error }) => {
                 if (error) {
-                    addResult('❌ Auth connection error: ' + error.message, 'error');
+                    addResult('❌ Profiles table error: ' + error.message, 'error');
                 } else {
-                    addResult('✅ Auth connection successful', 'success');
+                    addResult('✅ Profiles table exists. Total profiles: ' + count, 'success');
                 }
             });
-            
-            // Test 2: Check if profiles table exists
-            supabase.from('profiles').select('count', { count: 'exact', head: true })
-                .then(({ count, error }) => {
-                    if (error) {
-                        addResult('❌ Profiles table error: ' + error.message, 'error');
-                    } else {
-                        addResult('✅ Profiles table exists. Total profiles: ' + count, 'success');
-                    }
-                });
-            
-            // Test 3: List all tables
-            supabase.from('members').select('count', { count: 'exact', head: true })
-                .then(({ count, error }) => {
-                    if (error) {
-                        addResult('❌ Members table error: ' + error.message, 'error');
-                    } else {
-                        addResult('✅ Members table exists. Total members: ' + count, 'success');
-                    }
-                });
-        }
+        
+        // Test 3: Check members table
+        supabase.from('members').select('count', { count: 'exact', head: true })
+            .then(({ count, error }) => {
+                if (error) {
+                    addResult('❌ Members table error: ' + error.message, 'error');
+                } else {
+                    addResult('✅ Members table exists. Total members: ' + count, 'success');
+                }
+            });
+        
+        // Test 4: Check accounts table
+        supabase.from('accounts').select('count', { count: 'exact', head: true })
+            .then(({ count, error }) => {
+                if (error) {
+                    addResult('❌ Accounts table error: ' + error.message, 'error');
+                } else {
+                    addResult('✅ Accounts table exists. Total accounts: ' + count, 'success');
+                }
+            });
         
         function addResult(message, type) {
             const div = document.createElement('div');
@@ -92,7 +93,6 @@
             
             resultDiv.innerHTML = 'Testing login...';
             
-            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password
@@ -112,6 +112,8 @@
                     
                 if (profile) {
                     resultDiv.innerHTML += `<div class="bg-blue-100 text-blue-800 p-2 rounded mt-2">Role: ${profile.role}</div>`;
+                } else {
+                    resultDiv.innerHTML += `<div class="bg-yellow-100 text-yellow-800 p-2 rounded mt-2">⚠️ No profile found. Please run the SQL to create profiles.</div>`;
                 }
             }
         });
