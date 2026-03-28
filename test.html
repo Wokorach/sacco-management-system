@@ -3,28 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supabase Connection Test</title>
+    <title>Cypis Sacco - System Test</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 p-8">
-    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
-        <h1 class="text-2xl font-bold mb-4">Supabase Connection Test</h1>
-        
-        <div id="status" class="p-4 rounded-lg mb-4 bg-gray-200">
-            Testing connection...
-        </div>
-        
-        <div id="results" class="space-y-2"></div>
-        
-        <div class="mt-4 p-4 bg-yellow-50 rounded-lg">
-            <h3 class="font-bold">Test Login:</h3>
-            <form id="testLogin" class="mt-2 space-y-2">
-                <input type="email" id="testEmail" placeholder="Email" class="w-full p-2 border rounded">
-                <input type="password" id="testPassword" placeholder="Password" class="w-full p-2 border rounded">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Test Login</button>
-            </form>
-            <div id="testResult" class="mt-2"></div>
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h1 class="text-2xl font-bold text-green-600 mb-4">Cypis Sacco - System Test</h1>
+            
+            <div id="connectionStatus" class="p-4 rounded-lg mb-4 bg-gray-200">
+                Testing connection...
+            </div>
+            
+            <div id="results" class="space-y-2 mb-6"></div>
+            
+            <div class="border-t pt-6">
+                <h2 class="text-xl font-bold mb-4">Test Login</h2>
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                        <input type="email" id="email" class="w-full p-2 border rounded-lg" placeholder="Enter email">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                        <input type="password" id="password" class="w-full p-2 border rounded-lg" placeholder="Enter password">
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                        Test Login
+                    </button>
+                </form>
+                <div id="loginResult" class="mt-4"></div>
+            </div>
         </div>
     </div>
 
@@ -32,50 +43,77 @@
         const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA';
         
-        const statusDiv = document.getElementById('status');
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const statusDiv = document.getElementById('connectionStatus');
         const resultsDiv = document.getElementById('results');
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        async function testConnection() {
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Testing connection...';
+            
+            // Test 1: Auth
+            const { data: session } = await supabase.auth.getSession();
+            addResult('✅ Auth service is reachable', 'success');
+            
+            // Test 2: Profiles table
+            const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('*');
+            
+            if (profilesError) {
+                addResult('❌ Profiles table error: ' + profilesError.message, 'error');
+            } else {
+                addResult(`✅ Profiles table: ${profiles.length} profiles found`, 'success');
+                profiles.forEach(p => {
+                    addResult(`   - ${p.username}: ${p.full_name} (${p.role})`, 'info');
+                });
+            }
+            
+            // Test 3: Members table
+            const { data: members, error: membersError } = await supabase
+                .from('members')
+                .select('*');
+            
+            if (membersError) {
+                addResult('❌ Members table error: ' + membersError.message, 'error');
+            } else {
+                addResult(`✅ Members table: ${members.length} members found`, 'success');
+            }
+            
+            // Test 4: Accounts table
+            const { data: accounts, error: accountsError } = await supabase
+                .from('accounts')
+                .select('*');
+            
+            if (accountsError) {
+                addResult('❌ Accounts table error: ' + accountsError.message, 'error');
+            } else {
+                addResult(`✅ Accounts table: ${accounts.length} accounts found`, 'success');
+            }
+            
+            statusDiv.innerHTML = '<i class="fas fa-check-circle mr-2"></i> All systems operational!';
+            statusDiv.className = 'p-4 rounded-lg mb-4 bg-green-200 text-green-800';
+        }
         
-        statusDiv.innerHTML = '✅ Testing Supabase connection...';
-        statusDiv.className = 'p-4 rounded-lg mb-4 bg-blue-200 text-blue-800';
-        
-        // Test auth
-        supabase.auth.getSession().then(({ data, error }) => {
-            addResult(error ? '❌ Auth error: ' + error.message : '✅ Auth connection successful', !error);
-        });
-        
-        // Test profiles table
-        supabase.from('profiles').select('count', { count: 'exact', head: true })
-            .then(({ count, error }) => {
-                if (error) {
-                    addResult('❌ Profiles table error: ' + error.message, false);
-                } else {
-                    addResult('✅ Profiles table exists. Total profiles: ' + count, true);
-                }
-            });
-        
-        // Test members table
-        supabase.from('members').select('count', { count: 'exact', head: true })
-            .then(({ count, error }) => {
-                addResult(error ? '❌ Members table error: ' + error.message : '✅ Members table exists. Total members: ' + count, !error);
-            });
-        
-        function addResult(message, isSuccess) {
+        function addResult(message, type) {
             const div = document.createElement('div');
-            div.className = 'p-2 rounded ' + (isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800');
-            div.textContent = message;
+            div.className = 'p-2 rounded ' + (
+                type === 'success' ? 'bg-green-100 text-green-800' :
+                type === 'error' ? 'bg-red-100 text-red-800' :
+                'bg-blue-100 text-blue-800'
+            );
+            div.innerHTML = message;
             resultsDiv.appendChild(div);
         }
         
         // Test login
-        document.getElementById('testLogin').addEventListener('submit', async (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('testEmail').value;
-            const password = document.getElementById('testPassword').value;
-            const resultDiv = document.getElementById('testResult');
             
-            resultDiv.innerHTML = 'Testing login...';
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Logging in...';
             
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email,
@@ -83,23 +121,48 @@
             });
             
             if (error) {
-                resultDiv.innerHTML = `<div class="bg-red-100 text-red-800 p-2 rounded">❌ Login failed: ${error.message}</div>`;
+                resultDiv.innerHTML = `<div class="bg-red-100 text-red-800 p-3 rounded">❌ Login failed: ${error.message}</div>`;
             } else {
-                resultDiv.innerHTML = `<div class="bg-green-100 text-green-800 p-2 rounded">✅ Login successful! User: ${data.user.email}</div>`;
+                resultDiv.innerHTML = `<div class="bg-green-100 text-green-800 p-3 rounded">✅ Login successful! Welcome ${data.user.email}</div>`;
                 
+                // Get profile
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('role')
+                    .select('role, full_name')
                     .eq('id', data.user.id)
                     .single();
-                    
+                
                 if (profile) {
-                    resultDiv.innerHTML += `<div class="bg-blue-100 text-blue-800 p-2 rounded mt-2">Role: ${profile.role}</div>`;
-                } else {
-                    resultDiv.innerHTML += `<div class="bg-yellow-100 text-yellow-800 p-2 rounded mt-2">⚠️ No profile found. Run the profile insert SQL.</div>`;
+                    resultDiv.innerHTML += `<div class="bg-blue-100 text-blue-800 p-3 rounded mt-2">
+                        <strong>Role:</strong> ${profile.role}<br>
+                        <strong>Name:</strong> ${profile.full_name}
+                    </div>`;
+                    
+                    // Store user info
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('userRole', profile.role);
+                    
+                    // Show redirect info
+                    let redirectUrl = '';
+                    if (profile.role === 'branch_manager') redirectUrl = 'manager/dashboard.html';
+                    else if (profile.role === 'account_assistant') redirectUrl = 'assistant/transactions.html';
+                    else if (profile.role === 'loan_officer') redirectUrl = 'loan_officer/loans.html';
+                    
+                    if (redirectUrl) {
+                        resultDiv.innerHTML += `<div class="bg-yellow-100 text-yellow-800 p-3 rounded mt-2">
+                            ⏳ Redirecting to ${redirectUrl}...
+                        </div>`;
+                        
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 2000);
+                    }
                 }
             }
         });
+        
+        // Run tests
+        testConnection();
     </script>
 </body>
 </html>
