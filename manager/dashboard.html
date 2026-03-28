@@ -10,15 +10,16 @@
 </head>
 <body class="bg-gray-100">
     <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <i class="fas fa-piggy-bank text-2xl text-green-600 mr-2"></i>
-                    <span class="font-bold text-xl">Cypis Sacco - Manager Dashboard</span>
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-piggy-bank text-2xl text-green-600"></i>
+                    <span class="font-bold text-xl text-gray-800">Cypis Sacco</span>
+                    <span class="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">Manager Portal</span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span id="userName" class="text-gray-700"></span>
-                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    <span id="userName" class="text-gray-600"></span>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
                         <i class="fas fa-sign-out-alt mr-2"></i>Logout
                     </button>
                 </div>
@@ -27,147 +28,123 @@
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Stats Cards -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Welcome, <span id="managerName"></span>!</h1>
+            <p class="text-gray-600">Branch Manager Dashboard - Overview of all Sacco operations</p>
+        </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-                <div class="flex justify-between">
+                <div class="flex justify-between items-center">
                     <div>
                         <p class="text-gray-500 text-sm">Total Members</p>
                         <p id="totalMembers" class="text-3xl font-bold">0</p>
                     </div>
-                    <i class="fas fa-users text-3xl text-blue-500 opacity-50"></i>
+                    <i class="fas fa-users text-3xl text-blue-400"></i>
                 </div>
             </div>
-            
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-                <div class="flex justify-between">
+                <div class="flex justify-between items-center">
                     <div>
                         <p class="text-gray-500 text-sm">Total Deposits</p>
                         <p id="totalDeposits" class="text-3xl font-bold">UGX 0</p>
                     </div>
-                    <i class="fas fa-arrow-down text-3xl text-green-500 opacity-50"></i>
+                    <i class="fas fa-arrow-down text-3xl text-green-400"></i>
                 </div>
             </div>
-            
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-                <div class="flex justify-between">
+                <div class="flex justify-between items-center">
                     <div>
                         <p class="text-gray-500 text-sm">Total Withdrawals</p>
                         <p id="totalWithdrawals" class="text-3xl font-bold">UGX 0</p>
                     </div>
-                    <i class="fas fa-arrow-up text-3xl text-red-500 opacity-50"></i>
+                    <i class="fas fa-arrow-up text-3xl text-red-400"></i>
                 </div>
             </div>
-            
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
-                <div class="flex justify-between">
+                <div class="flex justify-between items-center">
                     <div>
                         <p class="text-gray-500 text-sm">Active Loans</p>
                         <p id="activeLoans" class="text-3xl font-bold">0</p>
                     </div>
-                    <i class="fas fa-hand-holding-usd text-3xl text-yellow-500 opacity-50"></i>
+                    <i class="fas fa-hand-holding-usd text-3xl text-yellow-400"></i>
                 </div>
             </div>
         </div>
         
-        <!-- Members List -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b">
-                <h3 class="text-lg font-semibold">Recent Members</h3>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <i class="fas fa-check-circle text-green-600 mr-2"></i>
+            <span class="text-green-700">System is ready. Start by adding members and processing transactions.</span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition">
+                <i class="fas fa-user-plus text-4xl text-green-600 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2">Add Member</h3>
+                <p class="text-gray-500 text-sm mb-3">Create new member accounts</p>
+                <button onclick="window.location.href='../assistant/transactions.html'" 
+                        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    Go to Members
+                </button>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Member #</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Full Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Phone</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Registered</th>
-                        </tr>
-                    </thead>
-                    <tbody id="membersTable" class="divide-y divide-gray-200"></tbody>
-                </table>
+            <div class="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition">
+                <i class="fas fa-hand-holding-usd text-4xl text-blue-600 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2">Loan Applications</h3>
+                <p class="text-gray-500 text-sm mb-3">Review and approve loans</p>
+                <button onclick="alert('Loan approval feature coming soon!')" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Review Loans
+                </button>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition">
+                <i class="fas fa-chart-line text-4xl text-purple-600 mb-3"></i>
+                <h3 class="text-lg font-semibold mb-2">Reports</h3>
+                <p class="text-gray-500 text-sm mb-3">Generate daily/weekly reports</p>
+                <button onclick="alert('Reports coming soon!')" 
+                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                    View Reports
+                </button>
             </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://manirdddkcvxcbvvusob.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA'; // ← PASTE YOUR ANON KEY HERE
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hbmlyZGRka2N2eGNidnZ1c29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTE0MTgsImV4cCI6MjA5MDI4NzQxOH0._rrnKSqeq51cH5AnN5KtEfTMBs3gcJIqIDwDNsDTvKA';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) window.location.href = '../index.html';
+        
+        if (!user) {
+            window.location.href = '../index.html';
+        }
         
         document.getElementById('userName').textContent = user.email;
+        document.getElementById('managerName').textContent = user.full_name || 'Manager';
         
         async function loadStats() {
-            const { count: membersCount } = await supabase
-                .from('members')
-                .select('*', { count: 'exact', head: true });
+            const { count: membersCount } = await _supabase.from('members').select('*', { count: 'exact', head: true });
             document.getElementById('totalMembers').textContent = membersCount || 0;
             
-            const { data: deposits } = await supabase
-                .from('transactions')
-                .select('amount')
-                .eq('transaction_type', 'deposit')
-                .eq('status', 'completed');
+            const { data: deposits } = await _supabase.from('transactions').select('amount').eq('transaction_type', 'deposit').eq('status', 'completed');
             const totalDeposits = deposits?.reduce((sum, t) => sum + t.amount, 0) || 0;
             document.getElementById('totalDeposits').textContent = `UGX ${totalDeposits.toLocaleString()}`;
             
-            const { data: withdrawals } = await supabase
-                .from('transactions')
-                .select('amount')
-                .eq('transaction_type', 'withdrawal')
-                .eq('status', 'completed');
+            const { data: withdrawals } = await _supabase.from('transactions').select('amount').eq('transaction_type', 'withdrawal').eq('status', 'completed');
             const totalWithdrawals = withdrawals?.reduce((sum, t) => sum + t.amount, 0) || 0;
             document.getElementById('totalWithdrawals').textContent = `UGX ${totalWithdrawals.toLocaleString()}`;
             
-            const { count: loansCount } = await supabase
-                .from('loans')
-                .select('*', { count: 'exact', head: true })
-                .in('status', ['approved', 'disbursed']);
+            const { count: loansCount } = await _supabase.from('loans').select('*', { count: 'exact', head: true }).in('status', ['approved', 'disbursed']);
             document.getElementById('activeLoans').textContent = loansCount || 0;
         }
         
-        async function loadMembers() {
-            const { data: members } = await supabase
-                .from('members')
-                .select('member_number, full_name, phone, status, registration_date')
-                .order('created_at', { ascending: false })
-                .limit(10);
-            
-            const tbody = document.getElementById('membersTable');
-            if (!members || members.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No members yet</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = members.map(m => `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm">${m.member_number}</td>
-                    <td class="px-6 py-4 text-sm font-medium">${m.full_name}</td>
-                    <td class="px-6 py-4 text-sm">${m.phone}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 text-xs rounded-full ${m.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                            ${m.status}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm">${new Date(m.registration_date).toLocaleDateString()}</td>
-                </tr>
-            `).join('');
-        }
-        
         async function logout() {
-            await supabase.auth.signOut();
+            await _supabase.auth.signOut();
             localStorage.removeItem('user');
             window.location.href = '../index.html';
         }
         
         loadStats();
-        loadMembers();
     </script>
 </body>
 </html>
